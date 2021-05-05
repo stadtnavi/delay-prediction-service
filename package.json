@@ -1,0 +1,34 @@
+{
+	"private": true,
+	"name": "delay-prediction-service",
+	"description": "Predict delays for Herrenberg buses.",
+	"version": "1.0.0",
+	"main": "index.js",
+	"author": "Stadtnavi contributors",
+	"contributors": [
+		"Jannis R <mail@jannisr.de>"
+	],
+	"homepage": "https://github.com/stadtnavi/delay-prediction-service/tree/5",
+	"repository": "stadtnavi/delay-prediction-service",
+	"bugs": "https://github.com/stadtnavi/delay-prediction-service/issues",
+	"license": "ISC",
+	"keywords": [
+		"stadtnavi",
+		"opentripplanner",
+		"api",
+		"public transport",
+		"transit"
+	],
+	"scripts": {
+		"lint": "eslint .",
+		"start": "node index.js"
+	},
+	"engines": {
+		"node": ">=14"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"eslint": "^7.25.0"
+	}
+}
