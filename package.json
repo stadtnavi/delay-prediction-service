@@ -27,7 +27,8 @@
 		"node": ">=14"
 	},
 	"dependencies": {
-		"ioredis": "^4.27.2"
+		"ioredis": "^4.27.2",
+		"pino": "^6.11.3"
 	},
 	"devDependencies": {
 		"@turf/buffer": "^6.3.0",
@@ -36,6 +37,7 @@
 		"extract-gtfs-shapes": "^1.1.0",
 		"gtfs-via-postgres": "^2.9.0",
 		"mri": "^1.1.6",
-		"ndjson": "^2.0.0"
+		"ndjson": "^2.0.0",
+		"pino-pretty": "^4.7.1"
 	}
 }
