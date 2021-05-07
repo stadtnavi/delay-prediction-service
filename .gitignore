@@ -6,3 +6,4 @@ node_modules
 npm-debug.log
 
 /data
+/trip-ids-by-shape-id.json

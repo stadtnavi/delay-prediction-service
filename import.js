@@ -13,13 +13,15 @@ const argv = mri(process.argv.slice(2), {
 if (argv.help || argv.h) {
 	process.stdout.write(`
 Usage:
-    import.js <path-to-shapes-file>
+    import.js <path-to-trips-file> <path-to-shapes-file>
 \n`)
 	process.exit(0)
 }
 
 const {join: pathJoin} = require('path')
 const Redis = require('ioredis')
+const readCsv = require('gtfs-utils/read-csv')
+const {writeFile} = require('fs/promises')
 const extractGtfsShapes = require('extract-gtfs-shapes')
 
 const showError = (err) => {
@@ -27,7 +29,11 @@ const showError = (err) => {
 	process.exit(1)
 }
 
-const pathToShapesFile = argv._[0]
+const pathToTripsFile = argv._[0]
+if (!pathToTripsFile) {
+	showError('Missing path-to-trips-file parameter.')
+}
+const pathToShapesFile = argv._[1]
 if (!pathToShapesFile) {
 	showError('Missing path-to-shapes-file parameter.')
 }
@@ -36,6 +42,23 @@ const shapesFile = pathToShapesFile === '-'
 	: pathToShapesFile
 
 ;(async () => {
+	console.info('building map: shape_id -> trip_id, trip_id -> route_id')
+
+	const tripIdsByShapeId = Object.create(null)
+	for await (const t of readCsv(pathToTripsFile)) {
+		if (!t.shape_id) {
+			console.warn('trip has no shape_id, skipping', t)
+			continue
+		}
+		if (t.shape_id in tripIdsByShapeId) tripIdsByShapeId[t.shape_id].push(t.trip_id)
+		else tripIdsByShapeId[t.shape_id] = [t.trip_id]
+	}
+	await writeFile(
+		pathJoin(__dirname, 'trip-ids-by-shape-id.json'),
+		JSON.stringify(tripIdsByShapeId),
+	)
+
+
 	console.info('creating a Tile38 geofence channel for each shape')
 
 	const tile38 = new Redis(process.env.TILE38_URL || 'redis://localhost:9851/')
