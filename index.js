@@ -2,6 +2,8 @@
 
 const Redis = require('ioredis')
 const logger = require('./lib/logger')
+const findCandidates = require('./lib/find-candidates')
+const {runWithinTx} = require('./db')
 
 const showError = (err) => {
 	logger.error(err)
@@ -31,7 +33,7 @@ const startReceivingGeofenceEvents = async (onEventMsg) => {
 	return stop
 }
 
-startReceivingGeofenceEvents((_, channel, event) => {
+const matchGeofenceEvent = async (channel, event) => {
 	const shapeId = channel
 	event = JSON.parse(event)
 	if (!event.fields) {
@@ -44,6 +46,18 @@ startReceivingGeofenceEvents((_, channel, event) => {
 		fields: {lo: longitude, la: latitude},
 	} = event
 
-	// todo
+	await runWithinTx(async (db) => {
+		const candidateTripIds = await findCandidates(db, shapeId)
+
+		// todo: read past positions
+		// todo: determine if direction/orientation is correct
+		// todo: match against route
+		// todo
+	})
+}
+
+startReceivingGeofenceEvents((_, channel, event) => {
+	matchGeofenceEvent(channel, event)
+	.catch(showError) // todo: abort on errors here?
 })
 .catch(showError)

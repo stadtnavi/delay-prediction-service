@@ -17,5 +17,7 @@ ADD . /app
 
 EXPOSE 3000
 ENV PORT 3000
+ENV LOCALE de-DE
+ENV TIMEZONE Europe/Berlin
 
 CMD ["node", "index.js"]

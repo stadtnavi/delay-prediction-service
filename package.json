@@ -28,6 +28,9 @@
 	},
 	"dependencies": {
 		"ioredis": "^4.27.2",
+		"luxon": "^1.26.0",
+		"pg": "^8.6.0",
+		"pg-format": "^1.0.4",
 		"pino": "^6.11.3"
 	},
 	"devDependencies": {
