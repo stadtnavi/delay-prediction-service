@@ -19,10 +19,10 @@ Usage:
 }
 
 const {join: pathJoin} = require('path')
-const Redis = require('ioredis')
 const readCsv = require('gtfs-utils/read-csv')
 const {writeFile} = require('fs/promises')
 const extractGtfsShapes = require('extract-gtfs-shapes')
+const tile38 = require('./lib/tile38')
 
 const showError = (err) => {
 	console.error(err)
@@ -60,9 +60,6 @@ const shapesFile = pathToShapesFile === '-'
 
 
 	console.info('creating a Tile38 geofence channel for each shape')
-
-	const tile38 = new Redis(process.env.TILE38_URL || 'redis://localhost:9851/')
-	tile38.setchan = tile38.createBuiltinCommand('setchan').string
 
 	const onShape = async (shapeId, points) => {
 		const shape = {
