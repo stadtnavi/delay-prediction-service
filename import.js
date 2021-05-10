@@ -21,6 +21,8 @@ Usage:
 const {join: pathJoin} = require('path')
 const readCsv = require('gtfs-utils/read-csv')
 const {writeFile} = require('fs/promises')
+// const buffer = require('@turf/buffer')
+// const truncate = require('@turf/truncate').default
 const extractGtfsShapes = require('extract-gtfs-shapes')
 const tile38 = require('./lib/tile38')
 
@@ -62,6 +64,8 @@ const shapesFile = pathToShapesFile === '-'
 	console.info('creating a Tile38 geofence channel for each shape')
 
 	const onShape = async (shapeId, points) => {
+		// if (shapeId !== '31-779-j21-2.1.H') return; // todo: remove
+
 		const shape = {
 			type: 'LineString',
 			coordinates: points.map(p => [
@@ -70,6 +74,10 @@ const shapesFile = pathToShapesFile === '-'
 				parseFloat(p[1]),
 			]),
 		}
+		// NEARBY with an OBJECT is not supported, so we compute a buffer
+		// see also https://github.com/tidwall/tile38/issues/79
+		// shape = buffer(shape, .05, {units: 'kilometers'}) // 50m
+		// shape = truncate(shape, {precision: 5}).geometry
 
 		const channelId = shapeId
 		await tile38.setchan(
@@ -87,6 +95,8 @@ const shapesFile = pathToShapesFile === '-'
 	}
 	await extractGtfsShapes(shapesFile, onShape, {
 		formatShape: (shapeId, points) => points,
+		// mute logging
+		// logger: new require('console').Console({stdout: process.stderr}),
 	})
 
 	tile38.quit()

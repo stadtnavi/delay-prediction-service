@@ -7,6 +7,13 @@
 ![ISC-licensed](https://img.shields.io/github/license/stadtnavi/delay-prediction-service.svg)
 
 
+brew install tile38
+
+./import.js gtfs/{trips,shapes}.txt
+
+gtfs-to-sql -d --trips-without-shape-id --routes-without-agency-id -- gtfs/{trips,routes,agency,calendar,calendar_dates,stops,stop_times}.txt | psql -b
+
+
 ## running via Docker
 
 A Docker image [is available as `stadtnavi/delay-prediction-service`](https://hub.docker.com/r/stadtnavi/delay-prediction-service).

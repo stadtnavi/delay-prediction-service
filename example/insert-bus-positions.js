@@ -35,6 +35,9 @@ process.stdin
 		'FIELD', 'la', latitude,
 		// todo: add speed as field?
 		// todo: add pax as field?
+		// Use `EX` to add a TTL to the vehicle position.
+		// https://tile38.com/commands/set#options
+		'EX', TTL,
 		'OBJECT', JSON.stringify(shape),
 	].join(' ') + '\n')
 })

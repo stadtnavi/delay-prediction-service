@@ -2,6 +2,7 @@
 
 const Redis = require('ioredis')
 const logger = require('./lib/logger')
+const readShape = require('./lib/read-shape')
 const findCandidates = require('./lib/find-candidates')
 const {runWithinTx} = require('./db')
 
@@ -23,11 +24,11 @@ const startReceivingGeofenceEvents = async (onEventMsg) => {
 
 	const stop = async () => {
 		tile38.removeListener('pmessage', onEventMsg)
-		await tile38.punsubscribe('*')
+		await tile38.punsubscribe('3*')
 	}
 
 	tile38.on('pmessage', onEventMsg)
-	const nrOfSubscribedChannels = await tile38.psubscribe('*')
+	const nrOfSubscribedChannels = await tile38.psubscribe('3*')
 	logger.debug(`subscribed to ${nrOfSubscribedChannels} channels`)
 
 	return stop
@@ -49,11 +50,23 @@ const matchGeofenceEvent = async (channel, event) => {
 	await runWithinTx(async (db) => {
 		const candidateTripIds = await findCandidates(db, shapeId)
 
+		const {rows} = await db.query(`\
+			SELECT *
+			FROM last_vehicle_positions
+			WHERE vehicle_id = $1
+			ORDER BY vehicle_id, t DESC
+		`, [
+			vehicleId,
+		])
+
 		// todo: read past positions
 		// todo: determine if direction/orientation is correct
+		const shape = await readShape(shapeId)
 		// todo: match against route
 		// todo
+		console.error('candidateTripIds', candidateTripIds)
 	})
+	process.exit(1) // todo: remove
 }
 
 startReceivingGeofenceEvents((_, channel, event) => {
