@@ -13,3 +13,6 @@ gtfs-to-sql -d --trips-without-shape-id --routes-without-agency-id \
 
 # set up tables, views, etc. necessary for matching
 psql -f deploy.sql
+
+# todo: remove
+psql -f herrenberg-dummy-data.sql
