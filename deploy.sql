@@ -32,4 +32,50 @@ CREATE TABLE vehicle_positions (
 CREATE INDEX ON vehicle_positions (vehicle_id, t);
 -- CREATE INDEX ON vehicle_positions USING GIST (location);
 
+CREATE TYPE shape_matching AS (
+	shape_id TEXT,
+	nr_of_consec_vehicle_pos BIGINT
+);
+
+CREATE FUNCTION all_shapes_matching_vehicle_positions(
+	_yesterday date,
+	_today date,
+	_t_min timestamptz,
+	_t_max timestamptz,
+	_vehicle_id text
+)
+RETURNS SETOF shape_matching
+AS $$
+	SELECT
+		shapes.shape_id,
+		count(pos.pos_id) as nr_of_consec_vehicle_pos
+	FROM (
+		SELECT DISTINCT ON (trips.shape_id)
+			trips.shape_id
+		FROM arrivals_departures
+		INNER JOIN trips ON trips.trip_id = arrivals_departures.trip_id
+		WHERE True
+		-- cut off by date for better performance
+		-- todo: use range from t_min to t_max instead of hardcoded values
+		AND (date = _yesterday OR date = _today)
+		AND t_arrival >= _t_min AND t_arrival <= _t_max
+	) shape_ids
+	INNER JOIN shapes_aggregated shapes ON shapes.shape_id = shape_ids.shape_id
+	INNER JOIN (
+		SELECT
+			id as pos_id,
+			vehicle_id,
+			location,
+			hdop,
+			t
+		FROM vehicle_positions
+		WHERE True
+		AND vehicle_id = _vehicle_id
+		AND t >= _t_min AND t <= _t_max
+	) pos ON st_dwithin(shapes.shape, pos.location, pos.hdop)
+	GROUP BY shapes.shape_id, vehicle_id
+	ORDER BY nr_of_consec_vehicle_pos DESC
+	LIMIT 2;
+$$ LANGUAGE sql;
+
 COMMIT;
