@@ -78,4 +78,38 @@ AS $$
 	LIMIT 2;
 $$ LANGUAGE sql;
 
+CREATE FUNCTION shape_matching_vehicle_positions(
+	_yesterday date,
+	_today date,
+	_t_min timestamptz,
+	_t_max timestamptz,
+	_vehicle_id text
+)
+RETURNS shape_matching
+AS $$
+	DECLARE
+		_sm shape_matching;
+		_first shape_matching;
+	BEGIN
+		FOR _sm IN
+			SELECT * FROM all_shapes_matching_vehicle_positions(
+				_yesterday,
+				_today,
+				_t_min,
+				_t_max,
+				_vehicle_id
+			)
+		LOOP
+			-- all_shapes_matching_vehicle_positions returns <= 2 results
+			IF _first IS NULL THEN
+				_first := _sm;
+			ELSEIF _sm.nr_of_consec_vehicle_pos = _first.nr_of_consec_vehicle_pos THEN
+				RAISE NOTICE '>1 shape with *equal* nr of matching consecutive vehicle positions';
+				RETURN NULL; -- abort
+			END IF;
+		END LOOP;
+		RETURN _first;
+	END;
+$$ LANGUAGE plpgsql;
+
 COMMIT;
