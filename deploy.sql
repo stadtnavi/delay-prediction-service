@@ -37,7 +37,9 @@ CREATE TYPE matched_vehicle AS (
 	trip_id TEXT,
 	date TIMESTAMP,
 	shape_id TEXT,
-	nr_of_consec_vehicle_pos BIGINT
+	nr_of_consec_vehicle_pos BIGINT,
+	t_latest_vehicle_pos TIMESTAMPTZ,
+	latest_vehicle_pos geography(Point, 4326)
 );
 
 CREATE FUNCTION all_vehicle_matches(
@@ -59,7 +61,9 @@ AS $$
 		shape_ids.trip_id,
 		shape_ids.date,
 		shapes.shape_id,
-		count(pos.pos_id) OVER (PARTITION BY shapes.shape_id ORDER BY trip_id) as nr_of_consec_vehicle_pos
+		count(pos.pos_id) OVER (PARTITION BY shapes.shape_id ORDER BY trip_id) as nr_of_consec_vehicle_pos,
+		pos.t as t_latest_vehicle_pos,
+		pos.location as latest_vehicle_pos
 	FROM (
 		SELECT DISTINCT ON (trips.shape_id)
 			trips.shape_id,

@@ -27,6 +27,7 @@
 		"node": ">=14"
 	},
 	"dependencies": {
+		"@turf/nearest-point-on-line": "^6.3.0",
 		"bufferutil": "^4.0.3",
 		"luxon": "^1.27.0",
 		"pg": "^8.6.0",
