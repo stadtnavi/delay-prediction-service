@@ -30,6 +30,9 @@ const processVehiclePosition = async (db, vehiclePos) => {
 	await db.query(`
 		INSERT INTO vehicle_positions (vehicle_id, location, hdop, t)
 		VALUES ($1, $2, $3, $4)
+		ON CONFLICT ON CONSTRAINT vehicle_positions_unique DO UPDATE SET
+			location = EXCLUDED.location,
+			hdop = EXCLUDED.hdop;
 	`, [
 		vehicleId,
 		`POINT(${longitude} ${latitude})`,
