@@ -38,6 +38,7 @@
 	"devDependencies": {
 		"eslint": "^7.25.0",
 		"ndjson": "^2.0.0",
-		"pino-pretty": "^4.8.0"
+		"pino-pretty": "^4.8.0",
+		"sample-gtfs-feed": "^0.10.3"
 	}
 }
