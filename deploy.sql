@@ -1,8 +1,6 @@
 BEGIN;
 
--- todo: is this necessary for better performance?
 -- CREATE INDEX ON shapes USING GIST (shape_pt_loc);
-
 -- todo: is a materialized view rellay necessary for better performance?
 DROP VIEW shapes_aggregated;
 CREATE MATERIALIZED VIEW shapes_aggregated AS

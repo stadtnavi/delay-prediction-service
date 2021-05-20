@@ -51,7 +51,8 @@ const processVehiclePosition = async (db, vehiclePos) => {
 	await prognoseRunDelays(db, vehiclePos) // todo: use the result
 }
 
-subscribeToVehiclePositions()
+// subscribeToVehiclePositions()
+process.stdin.on('error', abortWithError).pipe(require('ndjson').parse())
 .on('error', abortWithError)
 .pipe(new Transform({
 	objectMode: true,
