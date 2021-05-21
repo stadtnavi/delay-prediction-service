@@ -1,5 +1,32 @@
 BEGIN;
 
+-- todo: fix this in the GTFS feed instead
+CREATE VIEW arrivals_departures_with_fixed_shape_dist_traveled AS
+SELECT
+	arrs_deps.*,
+	CASE
+		WHEN arrs_deps.shape_dist_traveled IS NOT NULL
+		THEN arrs_deps.shape_dist_traveled
+		ELSE closest_shape_pt.shape_dist_traveled
+	END shape_dist_traveled_fixed,
+	st_distance(shape_pt_loc, stops.stop_loc) as dist_to_closes_shape_pt,
+	closest_shape_pt.shape_pt_loc as closest_shape_pt_loc,
+	closest_shape_pt.shape_pt_sequence as closest_shape_pt_seq,
+	closest_shape_pt.shape_dist_traveled as closest_shape_dist_traveled
+FROM arrivals_departures arrs_deps
+INNER JOIN trips ON trips.trip_id = arrs_deps.trip_id
+INNER JOIN stops ON stops.stop_id = arrs_deps.stop_id
+LEFT JOIN LATERAL (
+	SELECT
+		shape_pt_sequence,
+		shape_pt_loc,
+		shape_dist_traveled
+	FROM shapes
+	WHERE shapes.shape_id = arrs_deps.shape_id
+	ORDER BY st_distance(shape_pt_loc, stops.stop_loc)
+	LIMIT 1
+) closest_shape_pt ON True;
+
 -- CREATE INDEX ON shapes USING GIST (shape_pt_loc);
 -- todo: is a materialized view rellay necessary for better performance?
 DROP VIEW shapes_aggregated;
