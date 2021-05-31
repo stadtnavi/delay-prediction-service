@@ -27,6 +27,8 @@
 		"node": ">=14"
 	},
 	"dependencies": {
+		"@turf/along": "^6.3.0",
+		"@turf/length": "^6.3.0",
 		"@turf/nearest-point-on-line": "^6.3.0",
 		"bufferutil": "^4.0.3",
 		"gtfs-realtime-bindings": "^0.0.6",

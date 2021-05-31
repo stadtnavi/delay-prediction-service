@@ -8,8 +8,10 @@ const fetchRun = require('./lib/fetch-run')
 const prognoseRunDelay = require('./lib/prognose-run-delay')
 const subscribeToVehiclePositions = require('./lib/vehicle-positions-source')
 const {runWithinTx} = require('./lib/db')
+const estimateVehiclePos = require('./lib/estimate-vehicle-position')
 const {
 	publishTripUpdate,
+	publishVehiclePosition,
 } = require('./lib/publish-realtime-data')
 
 // https://developers.google.com/transit/gtfs-realtime/reference/#enum-schedulerelationship
@@ -34,6 +36,7 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	const {
 		latestVehiclePos, tLatestVehiclePos, matchingConsecutiveVehiclePositions,
 		trip_id, date, shape_id,
+		trajectory,
 	} = runMatch
 
 	const run = await fetchRun(db, trip_id, date)
@@ -50,18 +53,21 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	)
 	if (delay === null) return; // abort
 
+	const tripDescriptor = {
+		trip_id,
+		route_id,
+		schedule_relationship: SCHEDULED,
+	}
+	const vehicleDescriptor = {
+		id: vehicleId,
+	}
+
 	// build GTFS-Realtime TripUpdate
 	// https://developers.google.com/transit/gtfs-realtime/reference/#message-tripupdate
 	const tripUpdate = {
 		timestamp: isoToPosix(tLatestVehiclePos),
-		trip: {
-			trip_id,
-			route_id,
-			schedule_relationship: SCHEDULED,
-		},
-		vehicle: {
-			id: vehicleId,
-		},
+		trip: tripDescriptor,
+		vehicle: vehicleDescriptor,
 		delay,
 		stop_time_update: arrsDeps.map((ad) => ({
 			stop_sequence: ad.stop_sequence,
@@ -79,7 +85,28 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	}
 	logger.debug({tripUpdate}, 'built GTFS-Realtime TripUpdate')
 
+	const tNow = Date.now()
+	const estimatedVehiclePos = estimateVehiclePos(trajectory, latestVehiclePos, tLatestVehiclePos, tNow)
+
+	// build GTFS-Realtime VehiclePosition
+	// https://developers.google.com/transit/gtfs-realtime/reference/#message-vehicleposition
+	const vehiclePosition = {
+		timestamp: tNow / 1000 | 0,
+		trip: tripDescriptor,
+		vehicle: vehicleDescriptor,
+		position: {
+			// todo: estimate position by extrapolating along the run's shape
+			longitude: estimatedVehiclePos.longitude,
+			latitude: estimatedVehiclePos.latitude,
+			// todo: bearing & odometer, using run's shape
+		},
+		// todo: current_stop_sequence, stop_id, current_status
+		// todo: congestion_level?
+		// todo: occupancy_status using pax count?
+	}
+
 	await publishTripUpdate(tripUpdate)
+	await publishVehiclePosition(vehiclePosition)
 }
 
 pipeline(
