@@ -6,8 +6,11 @@ const insertVehiclePosition = require('./lib/insert-vehicle-position')
 const matchVehicle = require('./lib/match-vehicle-positions')
 const fetchRun = require('./lib/fetch-run')
 const prognoseRunDelay = require('./lib/prognose-run-delay')
-const subscribeToVehiclePositions = require('./lib/vehicle-positions')
+const subscribeToVehiclePositions = require('./lib/vehicle-positions-source')
 const {runWithinTx} = require('./lib/db')
+const {
+	publishTripUpdate,
+} = require('./lib/publish-realtime-data')
 
 // https://developers.google.com/transit/gtfs-realtime/reference/#enum-schedulerelationship
 // enum ScheduleRelationship
@@ -76,24 +79,21 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	}
 	logger.debug({tripUpdate}, 'built GTFS-Realtime TripUpdate')
 
-	return tripUpdate
+	await publishTripUpdate(tripUpdate)
 }
 
 pipeline(
 	// todo
-	// subscribeToVehiclePositions()
+	// subscribeToVehiclePositions(),
 	process.stdin, require('ndjson').parse(),
 
 	new Transform({
 		objectMode: true,
 		transform: (vehiclePos, _, cb) => {
 			runWithinTx(db => processVehiclePosition(db, vehiclePos))
-			.then(res => cb(null, res), cb)
+			.then(() => cb(), cb)
 		},
 	}),
-
-	// todo
-	require('ndjson').stringify(), process.stderr,
 
 	(err) => {
 		if (err) {
