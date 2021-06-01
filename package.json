@@ -41,6 +41,7 @@
 	},
 	"devDependencies": {
 		"eslint": "^7.25.0",
+		"gtfs-utils": "github:derhuerst/gtfs-utils#compute-trajectories",
 		"ndjson": "^2.0.0",
 		"pino-pretty": "^4.8.0",
 		"sample-gtfs-feed": "^0.10.3"
