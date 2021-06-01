@@ -46,12 +46,18 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 		arrivalsDepartures: arrsDeps,
 	} = run
 
-	const delay = await prognoseRunDelay(
+	const {
+		delay,
+		prevOrCurrentArrDep, currentOrNextArrDep,
+	} = await prognoseRunDelay(
 		db,
 		run,
 		vehicleId, latestVehiclePos, tLatestVehiclePos,
 	)
-	if (delay === null) return; // abort
+	if (delay === null) {
+		logger.warn({run, delay}, 'unknown delay, aborting')
+		return; // abort
+	}
 
 	const tripDescriptor = {
 		trip_id,
@@ -68,24 +74,29 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 		timestamp: isoToPosix(tLatestVehiclePos),
 		trip: tripDescriptor,
 		vehicle: vehicleDescriptor,
-		delay,
-		stop_time_update: arrsDeps.map((ad) => ({
-			stop_sequence: ad.stop_sequence,
-			stop_id: ad.stop_id,
-			arrival: {
-				time: ad.t_arrival ? isoToPosix(ad.t_arrival) : null,
-				// todo: add delay & uncertainty
-			},
-			departure: {
-				time: ad.t_departure ? isoToPosix(ad.t_departure) : null,
-				// todo: add delay & uncertainty
-			},
-			schedule_relationship: SCHEDULED,
-		})),
+		// delay,
+		stop_time_update: arrsDeps.map((ad) => {
+			// don't add delays to past arrivals/departures
+			const withDelay = ad.stop_sequence >= prevOrCurrentArrDep.stop_sequence
+			return {
+				stop_sequence: ad.stop_sequence,
+				stop_id: ad.stop_id,
+				arrival: ad.t_arrival ? {
+					time: isoToPosix(ad.t_arrival) + (withDelay ? delay : 0),
+					delay: withDelay ? delay : null,
+					// todo: add uncertainty
+				} : {time: null},
+				departure: ad.t_departure ? {
+					time: isoToPosix(ad.t_departure) + (withDelay ? delay : 0),
+					delay: withDelay ? delay : null,
+					// todo: add uncertainty
+				} : {time: null},
+				schedule_relationship: SCHEDULED,
+			}
+		}),
 	}
 	logger.debug({tripUpdate}, 'built GTFS-Realtime TripUpdate')
 
-	const tNow = Date.now()
 	const estimatedVehiclePos = estimateVehiclePos(trajectory, latestVehiclePos, tLatestVehiclePos, tNow)
 
 	// build GTFS-Realtime VehiclePosition
