@@ -34,12 +34,13 @@ CREATE MATERIALIZED VIEW shapes_aggregated AS
 SELECT
 	shape_id,
 	array_agg(shape_dist_traveled) AS distances_travelled,
-	ST_MakeLine(array_agg(shape_pt_loc)) AS shape
+	-- todo: is there an ST_MakeLine for geography[]?
+	ST_MakeLine(array_agg(shape_pt_loc::geometry))::geography AS shape
 FROM (
 	SELECT
 		shape_id,
 		shape_dist_traveled,
-		ST_AsText(shape_pt_loc)::geometry AS shape_pt_loc
+		shape_pt_loc
 	FROM shapes
 	ORDER by shape_id, shape_pt_sequence
 ) shapes
@@ -58,7 +59,7 @@ CREATE TABLE vehicle_positions (
 CREATE INDEX ON vehicle_positions (vehicle_id, t);
 -- CREATE INDEX ON vehicle_positions USING GIST (location);
 
-CREATE TYPE matched_vehicle AS (
+CREATE TYPE matched_run AS (
 	trip_id TEXT,
 	date TIMESTAMP,
 	shape_id TEXT,
@@ -76,7 +77,7 @@ CREATE FUNCTION all_vehicle_matches(
 	_t_vehicle_pos_max timestamptz,
 	_vehicle_id text
 )
-RETURNS SETOF matched_vehicle
+RETURNS SETOF matched_run
 AS $$
 	-- todo: this is ugly, clean it up
 	SELECT *
@@ -85,7 +86,7 @@ AS $$
 		DISTINCT ON (shapes.shape_id, vehicle_id)
 		shape_ids.trip_id,
 		shape_ids.date,
-		shapes.shape_id,
+		shape_ids.shape_id,
 		count(pos.pos_id) OVER (PARTITION BY shapes.shape_id ORDER BY trip_id) as nr_of_consec_vehicle_pos,
 		pos.t as t_latest_vehicle_pos,
 		pos.location as latest_vehicle_pos
@@ -135,11 +136,11 @@ CREATE FUNCTION vehicle_match(
 	_t_vehicle_pos_max timestamptz,
 	_vehicle_id text
 )
-RETURNS matched_vehicle
+RETURNS matched_run
 AS $$
 	DECLARE
-		_sm matched_vehicle;
-		_first matched_vehicle;
+		_sm matched_run;
+		_first matched_run;
 	BEGIN
 		FOR _sm IN
 			SELECT * FROM all_vehicle_matches(
