@@ -36,7 +36,6 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	const {
 		latestVehiclePos, tLatestVehiclePos, matchingConsecutiveVehiclePositions,
 		trip_id, date, shape_id,
-		trajectory,
 	} = runMatch
 
 	const run = await fetchRun(db, trip_id, date)
@@ -97,7 +96,8 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	}
 	logger.debug({tripUpdate}, 'built GTFS-Realtime TripUpdate')
 
-	const estimatedVehiclePos = estimateVehiclePos(trajectory, latestVehiclePos, tLatestVehiclePos, tNow)
+	const tNow = Date.now()
+	const estimatedVehiclePos = estimateVehiclePos(arrsDeps, shape, latestVehiclePos, tLatestVehiclePos, tNow)
 
 	// build GTFS-Realtime VehiclePosition
 	// https://developers.google.com/transit/gtfs-realtime/reference/#message-vehicleposition
@@ -106,9 +106,8 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 		trip: tripDescriptor,
 		vehicle: vehicleDescriptor,
 		position: {
-			// todo: estimate position by extrapolating along the run's shape
-			longitude: estimatedVehiclePos.longitude,
-			latitude: estimatedVehiclePos.latitude,
+			latitude: estimatedVehiclePos.coordinates[1],
+			longitude: estimatedVehiclePos.coordinates[0],
 			// todo: bearing & odometer, using run's shape
 		},
 		// todo: current_stop_sequence, stop_id, current_status
