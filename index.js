@@ -7,6 +7,10 @@ const prognoseVehiclePosition = require('./lib/prognose-vehicle-position')
 const prognoseTripUpdate = require('./lib/prognose-trip-update')
 const subscribeToVehiclePositions = require('./lib/vehicle-positions-source')
 const {runWithinTx} = require('./lib/db')
+const {
+	schedulePrognoseTripUpdate,
+	schedulePrognoseVehiclePosition,
+} = require('./lib/schedule-timer')
 
 // https://developers.google.com/transit/gtfs-realtime/reference/#enum-schedulerelationship
 // enum ScheduleRelationship
@@ -30,6 +34,8 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 		prognoseTripUpdate(db, vehicleId, tVehiclePos),
 		prognoseVehiclePosition(db, vehicleId, tVehiclePos),
 	])
+	schedulePrognoseTripUpdate(20 * 1000, vehicleId, tVehiclePos)
+	schedulePrognoseVehiclePosition(10 * 1000, vehicleId, tVehiclePos)
 }
 
 pipeline(
