@@ -28,8 +28,12 @@ gtfs-to-sql -d --trips-without-shape-id --routes-without-agency-id \
 	-- $gtfs_dir/{trips,routes,agency,calendar,calendar_dates,stops,stop_times,shapes}.txt | \
 	psql -b
 
+pushd .
+sort="$(realpath node_modules/gtfs-utils/sort.sh)"
+cd "$gtfs_dir"
+$sort
+popd
+GTFS_DIR="$gtfs_dir" ./compute-trajectories.js
+
 # set up tables, views, etc. necessary for matching
 psql -f deploy.sql
-
-# todo: remove
-psql -f herrenberg-dummy-data.sql
