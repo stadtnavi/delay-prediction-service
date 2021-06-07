@@ -28,6 +28,7 @@
 	},
 	"dependencies": {
 		"@turf/along": "^6.3.0",
+		"@turf/distance": "^6.3.0",
 		"@turf/length": "^6.3.0",
 		"@turf/nearest-point-on-line": "^6.3.0",
 		"gtfs-realtime-bindings": "^0.0.6",
