@@ -2,13 +2,14 @@
 set -e
 set -o pipefail
 cd $(dirname $(realpath $0))
-set -x
 
 # gtfs_dir=~/stadtnavi/gtfs-hub/data/gtfs/VVS.filtered.gtfs
 if [ -z "$gtfs_dir" ]; then
 	1>&2 echo 'missing $gtfs_dir env var'
 	exit 1
 fi
+
+set -x
 
 rows=$(cat $gtfs_dir/shapes.txt | wc -l | bc)
 rows_with_dist=$(xsv search -s shape_dist_traveled '.+' $gtfs_dir/shapes.txt | wc -l | bc)
@@ -33,6 +34,8 @@ sort="$(realpath node_modules/gtfs-utils/sort.sh)"
 cd "$gtfs_dir"
 $sort
 popd
+
+rimraf 'trajectories/*.json'
 GTFS_DIR="$gtfs_dir" ./compute-trajectories.js
 
 # set up tables, views, etc. necessary for matching
