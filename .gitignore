@@ -7,3 +7,4 @@ npm-debug.log
 
 .env
 /trajectories
+/current_gtfs_id

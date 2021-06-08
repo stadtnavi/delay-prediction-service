@@ -8,8 +8,17 @@ LABEL org.opencontainers.image.revision="1"
 LABEL org.opencontainers.image.licenses="ISC"
 WORKDIR /app
 
+RUN apk add --no-cache --update \
+	bash \
+	curl \
+	unzip \
+	postgresql-client \
+	moreutils
+ADD 'https://github.com/johnkerl/miller/releases/download/v5.10.2/mlr.linux.x86_64' /usr/bin/mlr
+RUN chmod +x /usr/bin/mlr
+
 ADD package.json package-lock.json /app/
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 WORKDIR /app
 
