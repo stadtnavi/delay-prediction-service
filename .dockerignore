@@ -1,2 +1,6 @@
 .git
 node_modules
+
+/trajectories
+/gtfs
+/data

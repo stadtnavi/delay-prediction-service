@@ -20,7 +20,11 @@ const readFile = async (name) => {
 	return await readCsv(pathJoin(src, name + '.txt'))
 }
 
-const destDir = process.env.TRAJECTORIES_DIR || pathJoin(__dirname, 'trajectories')
+const destDir = process.env.TRAJECTORIES_DIR
+if (!destDir) {
+	console.error('Missing/empty TRAJECTORIES_DIR environment variable.')
+	process.exit(1)
+}
 
 const herrenberg779Bus = ['31-779-j21-2']
 const herrenberg782Bus = ['31-782-j21-1']
