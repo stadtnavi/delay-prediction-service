@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - plain-js # todo: remove
 jobs:
   tests:
     name: lint
