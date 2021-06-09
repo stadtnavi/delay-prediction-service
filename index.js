@@ -39,9 +39,7 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 }
 
 pipeline(
-	// todo
-	// subscribeToVehiclePositions(),
-	process.stdin, require('ndjson').parse(),
+	subscribeToVehiclePositions(),
 
 	new Transform({
 		objectMode: true,
