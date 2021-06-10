@@ -19,7 +19,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run lint
-    # todo: run tests
+    - run: npm test
 
   docker:
     name: build & publish Docker image

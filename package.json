@@ -21,7 +21,8 @@
 	],
 	"scripts": {
 		"lint": "eslint .",
-		"start": "node index.js"
+		"start": "node index.js",
+		"test": "./test/index.sh"
 	},
 	"engines": {
 		"node": ">=14"
