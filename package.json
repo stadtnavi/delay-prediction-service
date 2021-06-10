@@ -32,6 +32,7 @@
 		"@turf/distance": "^6.3.0",
 		"@turf/length": "^6.3.0",
 		"@turf/nearest-point-on-line": "^6.3.0",
+		"debug": "^4.3.1",
 		"gtfs-realtime-bindings": "^0.0.6",
 		"gtfs-utils": "^5.0.0-alpha.2",
 		"luxon": "^1.27.0",
