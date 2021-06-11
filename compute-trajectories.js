@@ -26,10 +26,17 @@ if (!destDir) {
 	process.exit(1)
 }
 
-const herrenberg779Bus = ['31-779-j21-2']
-const herrenberg782Bus = ['31-782-j21-1']
 const filters = {
-	trip: t => [...herrenberg779Bus, ...herrenberg782Bus].includes(t.route_id),
+	trip: t => [
+		// Herrenberg 773 bus
+		'31-773-j21-4', '31-773-j21-5',
+		// Herrenberg 779 bus
+		'31-779-j21-2',
+		// Herrenberg 780 bus
+		'31-780-j21-1', '31-780-j21-2',
+		// Herrenberg 782 bus
+		'31-782-j21-1',
+	].includes(t.route_id),
 }
 
 const withAbsoluteTime = (tr, date) => {
