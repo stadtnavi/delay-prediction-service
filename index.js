@@ -1,6 +1,6 @@
 'use strict'
 
-const {Transform, pipeline} = require('stream')
+const {Writable, pipeline} = require('stream')
 const logger = require('./lib/logger')
 const insertVehiclePosition = require('./lib/insert-vehicle-position')
 const prognoseVehiclePosition = require('./lib/prognose-vehicle-position')
@@ -41,9 +41,10 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 pipeline(
 	subscribeToVehiclePositions(),
 
-	new Transform({
+	new Writable({
 		objectMode: true,
-		transform: (vehiclePos, _, cb) => {
+		highWaterMark: 1,
+		write: (vehiclePos, _, cb) => {
 			runWithinTx(db => processVehiclePosition(db, vehiclePos))
 			.then(() => cb(), cb)
 		},
