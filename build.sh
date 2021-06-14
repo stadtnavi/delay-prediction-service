@@ -29,10 +29,13 @@ user_agent='https://github.com/stadtnavi/delay-prediction-service'
 gtfs_file="$(mktemp)"
 curl -sSLf -H "$user_agent" --compressed -R "$GTFS_URL" -o "$gtfs_file"
 
-# compute GTFS feed ID, used for directory & database names
-gtfs_modified=$(node -p "fs.statSync('$gtfs_file').mtime.toISOString().slice(0, 10)")
+export GTFS_ID="$GTFS_ID"
+if [ -z "$GTFS_ID" ]; then
+	# compute GTFS feed ID, used for directory & database names
+	gtfs_modified=$(node -p "fs.statSync('$gtfs_file').mtime.toISOString().slice(0, 10)")
 
-export GTFS_ID=$(echo "$GTFS_NAME-$gtfs_modified" | sed 's/[^a-zA-Z0-9_]/_/g')
+	export GTFS_ID=$(echo "$GTFS_NAME-$gtfs_modified" | sed 's/[^a-zA-Z0-9_]/_/g')
+fi
 echo "new \$GTFS_ID: $GTFS_ID"
 
 # extract GTFS feed to tmp dir
