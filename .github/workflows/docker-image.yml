@@ -5,11 +5,18 @@ on:
       - main
 jobs:
   tests:
-    name: lint
+    name: lint & test
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14.x, 16.x]
+    env:
+      TIMEZONE: Europe/Berlin
+      LOCALE: de-DE
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: password
     steps:
     - name: checkout
       uses: actions/checkout@v2
@@ -17,9 +24,25 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - name: install & start PostgreSQL with PostGIS
+      uses: huaxk/postgis-action@v1
+      with:
+        postgresql password: password
+        postgresql user: postgres
+        postgresql db: test
+    - name: install Miller & sponge
+      run: sudo apt install miller moreutils
     - run: npm ci
+
     - run: npm run lint
+    - run: ./build.sh
+      env:
+        GTFS_ID: test
+        GTFS_NAME: vvs
+        GTFS_URL: 'https://gtfs.mfdz.de/VVS.with_shapes.gtfs.zip'
     - run: npm test
+      env:
+        GTFS_ID: test
 
   docker:
     name: build & publish Docker image
