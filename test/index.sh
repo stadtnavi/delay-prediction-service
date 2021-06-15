@@ -7,3 +7,4 @@ set -x
 
 node detect-dwelling.js
 env TRAJECTORIES_DIR="$PWD/read-trajectories" node read-trajectories/index.js
+node match-vehicle-positions-with-trajectory.js
