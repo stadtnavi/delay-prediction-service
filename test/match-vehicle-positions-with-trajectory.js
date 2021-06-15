@@ -41,6 +41,7 @@ const matchVehiclePositionsWithTrajectory = require('../lib/match-vehicle-positi
 
 	const score780 = matchVehiclePositionsWithTrajectory(vehiclePositions, tr780)
 	const score782 = matchVehiclePositionsWithTrajectory(vehiclePositions, tr782)
+	ok(score782 <= 100, 'score(tr782) is to high/bad')
 	ok(score782 < score780 * .8, 'score(782) is not lower than score(780) * .8')
 }
 
@@ -69,6 +70,7 @@ const matchVehiclePositionsWithTrajectory = require('../lib/match-vehicle-positi
 	const scoreOutbound = matchVehiclePositionsWithTrajectory(vehiclePositions, trOutbound)
 	const scoreReturn = matchVehiclePositionsWithTrajectory(vehiclePositions, trReturn)
 	console.error({scoreOutbound, scoreReturn})
+	ok(scoreReturn <= 100, 'score(trReturn) is to high/bad')
 	ok(scoreReturn < scoreOutbound * .8, 'score(trReturn) is not lower than score(trReturn) * .8')
 }
 
