@@ -3,6 +3,24 @@ set -e
 set -o pipefail
 cd $(dirname $(realpath $0))
 
+# This scripts is written for continuous deployment environments.
+# Because it is idempotent and cleans up after itself (except in
+# unforseen circumstances), it should be called
+# - during all deployments
+# - regularly (e.g. nightly), in order to use the latest GTFS feed
+#
+# Given two environment variables $GTFS_NAME and $GTFS_URL, it
+# 1. downloads the GTFS feed
+# 2. computes $GTFS_ID from the feed's name & date of modification
+# 3. if there's no PostgreSQL DB $GTFS_ID (a.k.a. it's a new feed), it
+#     a. imports the new GTFS feed into a new DB $GTFS_ID,
+#     b. deploys tools needed by this service (see deploy.sql) into it,
+# 4. if there's no trajectories dir $GTFS_ID (a.k.a. it's a new feed), it
+#     a. computes trajectories from the new feed into a directory $GTFS_ID
+# 6. prunes old data
+#     - previous/old PostgreSQL DB
+#     - previous/old trajectories directory
+
 if [ -z "$GTFS_NAME" ]; then
 	1>&2 echo 'missing $GTFS_NAME env var'
 	exit 2
