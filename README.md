@@ -10,6 +10,7 @@
 ## documentation
 
 - [architecture](docs/architecture.md)
+- [how it works](docs/how-it-works.md)
 
 
 ## deploying to production
