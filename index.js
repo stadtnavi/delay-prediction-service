@@ -12,14 +12,6 @@ const {
 	schedulePrognoseVehiclePosition,
 } = require('./lib/schedule-timer')
 
-// https://developers.google.com/transit/gtfs-realtime/reference/#enum-schedulerelationship
-// enum ScheduleRelationship
-// The relation between this StopTime and the static schedule.
-// SCHEDULED – The vehicle is proceeding in accordance with its static schedule of stops, although not necessarily according to the times of the schedule. This is the default behavior. At least one of arrival and departure must be provided.
-const SCHEDULED = 0
-
-const isoToPosix = iso => Date.parse(iso) / 1000 | 0
-
 const processVehiclePosition = async (db, vehiclePosEv) => {
 	if (vehiclePosEv.hdop < 0) {
 		// todo: find the root cause

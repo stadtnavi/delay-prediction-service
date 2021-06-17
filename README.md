@@ -1,6 +1,6 @@
 # delay-prediction-service
 
-**Predict delays for [Herrenberg](https://en.wikipedia.org/wiki/Herrenberg) buses.**
+**Predict delays for [Herrenberg](https://en.wikipedia.org/wiki/Herrenberg) buses.** Part of [Stadtnavi Herrenberg](https://herrenberg.stadtnavi.de).
 
 [![CI status tests](https://img.shields.io/github/workflow/status/stadtnavi/delay-prediction-service/lint,%20build%20&%20publish%20Docker%20image/main)](https://github.com/stadtnavi/delay-prediction-service/actions)
 [![dependency status](https://img.shields.io/david/stadtnavi/delay-prediction-service.svg)](https://david-dm.org/stadtnavi/delay-prediction-service)
