@@ -1,0 +1,4 @@
+route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color
+31-779-j21-2,,779,Herrenb. ZOB Bhfstr. - Vogelsang - ZOB,3,FF0000,FFFFFF
+31-780-j21-2,,780,Herrenberg ZOB - Nord - West - Kalkofenstraße,3,FF0000,FFFFFF
+31-782-j21-1,,782,Herrenberg ZOB - Ehbühl - Waldfriedhof,3,FF0000,FFFFFF

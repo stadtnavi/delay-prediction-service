@@ -1,0 +1,4 @@
+route_id,service_id,trip_id,shape_id,trip_headsign,direction_id,block_id
+31-782-j21-1,T0#66,45.T0.31-782-j21-1.5.H,31-782-j21-1.5.H,Herrenberg Waldfriedhof,0,
+31-779-j21-2,T0#131,6.T0.31-779-j21-2.1.H,31-779-j21-2.1.H,Herrenb. ZOB Bahnhofstraße,0,
+31-780-j21-2,T0#140,7.T0.31-780-j21-2.2.H,31-780-j21-2.2.H,Herrenberg Kalkofenstr.,0,
