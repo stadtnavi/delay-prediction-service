@@ -9,6 +9,7 @@ const {Client: PostgresClient} = require('pg')
 const {transit_realtime: {
 	FeedMessage,
 	FeedHeader: {Incrementality},
+	VehiclePosition: {VehicleStopStatus},
 }} = require('gtfs-realtime-bindings')
 const {deepStrictEqual: eql, ok} = require('assert')
 
@@ -152,6 +153,9 @@ const abortWithError = (err) => {
 		eql(vPPredicted.vehicle.trip?.tripId, '45.T0.31-782-j21-1.5.H', 'predicted VehiclePosition: invalid trip.tripId')
 		eql(vPPredicted.vehicle.trip?.routeId, '31-782-j21-1', 'predicted VehiclePosition: invalid trip.routeId')
 		eql(vPPredicted.vehicle.trip?.scheduleRelationship, 0, 'predicted VehiclePosition: invalid trip.scheduleRelationship')
+		eql(vPPredicted.vehicle.currentStopSequence, 10, 'predicted VehiclePosition: invalid currentStopSequence')
+		eql(vPPredicted.vehicle.stopId, 'de:08115:4800:0:3', 'predicted VehiclePosition: invalid stopId')
+		eql(vPPredicted.vehicle.currentStatus, VehicleStopStatus.IN_TRANSIT_TO, 'predicted VehiclePosition: invalid currentStatus')
 		// todo: assert more
 
 		const tU = entities.find(e => !!e.tripUpdate)
