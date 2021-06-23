@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 'use strict'
 
+const {connect} = require('mqtt')
 // const {request} = require('http')
 const {join: pathJoin} = require('path')
 const {readdir, readFile} = require('fs/promises')
 const execa = require('execa')
+const aedes = require('aedes')
+const {createServer: createTCPServer} = require('net')
+const {promisify} = require('util')
 const {Client: PostgresClient} = require('pg')
 const {transit_realtime: {
 	FeedMessage,
@@ -16,6 +20,17 @@ const {deepStrictEqual: eql, ok} = require('assert')
 const abortWithError = (err) => {
 	console.error(err)
 	process.exit(1)
+}
+
+const connectToMQTT = (uri) => {
+	return new Promise((resolve, reject) => {
+		const client = connect(uri)
+		setTimeout(() => {
+			reject(new Error('timeout connecting to MQTT broker'))
+			client.end()
+		}, 1000)
+		client.once('connect', () => resolve(client))
+	})
 }
 
 ;(async () => {
@@ -84,18 +99,34 @@ const abortWithError = (err) => {
 		})
 	}
 
+	// start MQTT Broker
+	const mqttServer = createTCPServer(aedes().handle)
+	const stopMQTTBroker = async () => {
+		await promisify(mqttServer.close.bind(mqttServer))()
+	}
+	await promisify(mqttServer.listen.bind(mqttServer))(30883)
+	const MQTT_URI = 'mqtt://localhost:30883'
+
 	const svc = execa('node', ['index.js'], {
 		cwd: pathJoin(__dirname, '..', '..'),
 		stdout: 'inherit',
 		stderr: 'inherit',
 		env: {
 			...env,
-			PUBLISH_VIA_MQTT: 'false',
+			MQTT_URI,
 			READ_VEHICLE_POSITIONS_FROM_STDIN: 'true',
 		},
 	})
 	svc.catch((err) => {
 		if (err && !err.isCanceled) abortWithError(err)
+	})
+
+	const mqttClient = await connectToMQTT(MQTT_URI)
+	await promisify(mqttClient.subscribe.bind(mqttClient))('/gtfsrt/#')
+	await promisify(mqttClient.subscribe.bind(mqttClient))('/json/#')
+	const receivedViaMQTT = []
+	mqttClient.on('message', (topic, msg) => {
+		receivedViaMQTT.push([topic, msg])
 	})
 
 	{ // insert vehicle positions
@@ -170,7 +201,31 @@ const abortWithError = (err) => {
 		console.info('GTFS-RT served via HTTP looks good ✔︎')
 	}
 
+	{ // test GTFS-RT messages sent via MQTT
+		const latestMsg = (topic) => Array.from(receivedViaMQTT).reverse().find(([t]) => t === topic)
+
+		const vPRawPBF = latestMsg('/gtfsrt/vp/hb/1/1/bus//0/unknown-headsign/?/unknown-next-stop/unknown-start-time/14341fa0-5b00-11eb-98a5-133ebfea8661-raw/48;8./.8/68/09/unknown-route-short-name')
+		ok(vPRawPBF, 'missing raw pbf-encoded VehiclePosition')
+		const vPRawJSON = latestMsg('/json/vp/hb/1/1/bus//0/unknown-headsign/?/unknown-next-stop/unknown-start-time/14341fa0-5b00-11eb-98a5-133ebfea8661-raw/48;8./.8/68/09/unknown-route-short-name')
+		ok(vPRawJSON, 'missing raw JSON-encoded VehiclePosition')
+
+		const vPPredictedPBF = latestMsg('/gtfsrt/vp/hb/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
+		ok(vPPredictedPBF, 'missing raw pbf-encoded VehiclePosition')
+		const vPPredictedJSON = latestMsg('/json/vp/hb/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
+		ok(vPPredictedJSON, 'missing raw JSON-encoded VehiclePosition')
+
+		const tUPBF = latestMsg('/gtfsrt/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
+		ok(tUPBF, 'missing raw pbf-encoded TripUpdate')
+		const tUJSON = latestMsg('/json/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
+		ok(tUJSON, 'missing raw JSON-encoded TripUpdate')
+
+		// todo: check message fields
+		console.info('GTFS-RT sent via MQTT looks good ✔︎')
+	}
+
 	// stop service
 	svc.cancel()
+	mqttClient.end()
+	await stopMQTTBroker()
 })()
 .catch(abortWithError)
