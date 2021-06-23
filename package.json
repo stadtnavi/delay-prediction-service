@@ -48,6 +48,7 @@
 		"thingsboard-telemetry-stream": "^2.0.0"
 	},
 	"devDependencies": {
+		"aedes": "^0.46.0",
 		"csv-stringify": "^5.6.2",
 		"eslint": "^7.25.0",
 		"execa": "^5.1.1",
