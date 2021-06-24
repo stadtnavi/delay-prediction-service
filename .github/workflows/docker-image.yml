@@ -40,9 +40,9 @@ jobs:
         GTFS_ID: test
         GTFS_NAME: vvs
         GTFS_URL: 'https://gtfs.mfdz.de/VVS.with_shapes.gtfs.zip'
-    - run: npm test
-      env:
-        GTFS_ID: test
+    # - run: npm test
+    #   env:
+    #     GTFS_ID: test
 
   docker:
     name: build & publish Docker image
