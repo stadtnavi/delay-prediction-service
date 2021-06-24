@@ -3,6 +3,7 @@
 const {Writable, pipeline} = require('stream')
 const logger = require('./lib/logger')
 const insertVehiclePosition = require('./lib/insert-vehicle-position')
+const isWithinBusDepot = require('./lib/is-within-bus-depot')
 const prognoseVehiclePosition = require('./lib/prognose-vehicle-position')
 const prognoseTripUpdate = require('./lib/prognose-trip-update')
 const subscribeToVehiclePositions = require('./lib/vehicle-positions-source')
@@ -21,6 +22,10 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	const {vehicleId, t: tVehiclePos} = vehiclePosEv
 
 	await insertVehiclePosition(db, vehiclePosEv)
+
+	// We keep track of dwelling in the bus depot, but we don't want to act on
+	// it in any way.
+	if (isWithinBusDepot(vehiclePosEv)) return; // abort
 
 	await Promise.all([
 		prognoseTripUpdate(db, vehicleId, tVehiclePos),
