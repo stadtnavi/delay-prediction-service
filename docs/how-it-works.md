@@ -603,6 +603,6 @@ From this estimated position, we generate a [GTFS-RT `VehiclePosition`](https://
 
 ## 5. publish predictions as GTFS-RT
 
-We published the generated GTFS-RT messages via [MQTT](https://mqtt.org), to allow others to consume them in a streaming fashion.
+We publish the generated GTFS-RT messages via [MQTT](https://mqtt.org), to allow others to consume them in a streaming fashion.
 
 In addition, we also generate a GTFS-RT "dump" and serve it via HTTP, to allow others to retrieve the data in bulk, and because this is the most standardized way to serve GTFS-RT data.
