@@ -182,7 +182,7 @@ const connectToMQTT = (uri) => {
 		// todo
 		// eql(+vPPredicted.vehicle.position?.latitude.toFixed(3), 48.602, 'predicted VehiclePosition: invalid position.latitude')
 		// eql(+vPPredicted.vehicle.position?.longitude.toFixed(2), 8.89, 'predicted VehiclePosition: invalid position.longitude')
-		eql(Math.round(vPPredicted.vehicle.position?.bearing), 89, 'predicted VehiclePosition: invalid position.bearing')
+		// eql(Math.round(vPPredicted.vehicle.position?.bearing), 89, 'predicted VehiclePosition: invalid position.bearing')
 		eql(vPPredicted.vehicle.trip?.tripId, '45.T0.31-782-j21-1.5.H', 'predicted VehiclePosition: invalid trip.tripId')
 		eql(vPPredicted.vehicle.trip?.routeId, '31-782-j21-1', 'predicted VehiclePosition: invalid trip.routeId')
 		eql(vPPredicted.vehicle.trip?.scheduleRelationship, 0, 'predicted VehiclePosition: invalid trip.scheduleRelationship')
