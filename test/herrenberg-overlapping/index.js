@@ -204,9 +204,9 @@ const connectToMQTT = (uri) => {
 		const vPRawJSON = latestMsg('/json/vp-raw/14341fa0-5b00-11eb-98a5-133ebfea8661')
 		ok(vPRawJSON, 'missing raw JSON-encoded VehiclePosition')
 
-		const vPPredictedPBF = latestMsg('/gtfsrt/vp/hb/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
+		const vPPredictedPBF = latestMsg('/gtfsrt/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
 		ok(vPPredictedPBF, 'missing raw pbf-encoded VehiclePosition')
-		const vPPredictedJSON = latestMsg('/json/vp/hb/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
+		const vPPredictedJSON = latestMsg('/json/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
 		ok(vPPredictedJSON, 'missing raw JSON-encoded VehiclePosition')
 
 		const tUPBF = latestMsg('/gtfsrt/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
