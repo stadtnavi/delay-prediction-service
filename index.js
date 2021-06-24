@@ -26,8 +26,8 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 		prognoseTripUpdate(db, vehicleId, tVehiclePos),
 		prognoseVehiclePosition(db, vehicleId, tVehiclePos),
 	])
-	schedulePrognoseTripUpdate(20 * 1000, vehicleId, tVehiclePos)
-	schedulePrognoseVehiclePosition(10 * 1000, vehicleId, tVehiclePos)
+	schedulePrognoseTripUpdate(10 * 1000, vehicleId, tVehiclePos)
+	schedulePrognoseVehiclePosition(5 * 1000, vehicleId, tVehiclePos)
 }
 
 pipeline(
