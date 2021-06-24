@@ -174,12 +174,6 @@ const connectToMQTT = (uri) => {
 		const expectedNrOfEntities = 3
 		ok(entities.length, expectedNrOfEntities, 'nr of entities')
 
-		const vPRaw = entities.find(e => e.vehicle?.vehicle?.id === VEHICLE_ID + '-raw')
-		ok(vPRaw, 'missing raw VehiclePosition')
-		eql(+vPRaw.vehicle.timestamp, 1623670816, 'raw VehiclePosition: invalid timestamp')
-		eql(+vPRaw.vehicle.position?.latitude.toFixed(5), 48.6019, 'raw VehiclePosition: invalid position.latitude')
-		eql(+vPRaw.vehicle.position?.longitude.toFixed(5), 8.8897, 'raw VehiclePosition: invalid position.longitude')
-
 		const vPPredicted = entities.find(e => e.vehicle?.vehicle?.id === VEHICLE_ID)
 		ok(vPPredicted, 'missing predicted VehiclePosition')
 		// todo
@@ -208,9 +202,9 @@ const connectToMQTT = (uri) => {
 	{ // test GTFS-RT messages sent via MQTT
 		const latestMsg = (topic) => Array.from(receivedViaMQTT).reverse().find(([t]) => t === topic)
 
-		const vPRawPBF = latestMsg('/gtfsrt/vp/hb/1/1/bus//0/unknown-headsign/?/unknown-next-stop/unknown-start-time/14341fa0-5b00-11eb-98a5-133ebfea8661-raw/48;8./.8/68/09/unknown-route-short-name')
+		const vPRawPBF = latestMsg('/gtfsrt/vp-raw/14341fa0-5b00-11eb-98a5-133ebfea8661')
 		ok(vPRawPBF, 'missing raw pbf-encoded VehiclePosition')
-		const vPRawJSON = latestMsg('/json/vp/hb/1/1/bus//0/unknown-headsign/?/unknown-next-stop/unknown-start-time/14341fa0-5b00-11eb-98a5-133ebfea8661-raw/48;8./.8/68/09/unknown-route-short-name')
+		const vPRawJSON = latestMsg('/json/vp-raw/14341fa0-5b00-11eb-98a5-133ebfea8661')
 		ok(vPRawJSON, 'missing raw JSON-encoded VehiclePosition')
 
 		const vPPredictedPBF = latestMsg('/gtfsrt/vp/hb/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
