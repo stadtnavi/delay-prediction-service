@@ -606,3 +606,13 @@ From this estimated position, we generate a [GTFS-RT `VehiclePosition`](https://
 We publish the generated GTFS-RT messages via [MQTT](https://mqtt.org), to allow others to consume them in a streaming fashion.
 
 In addition, we also generate a GTFS-RT "dump" and serve it via HTTP, to allow others to retrieve the data in bulk, and because this is the most standardized way to serve GTFS-RT data.
+
+## 6. publish planned positions
+
+In addition to the matching & prediction process run for all *realtime* bus positions received (see above), `delay-prediction-service` also publishes *planned* (as in "according to GTFS-Static schedule") positions.
+
+Periodically, it
+
+1. determines all currently active *runs*, using the GTFS-Static data within the PostgreSQL DB,
+2. discards all *runs* that a *realtime*-position-based prediction has recently been published for (using an in-memory list),
+3. estimates their positions and publishes them.
