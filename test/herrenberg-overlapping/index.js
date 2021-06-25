@@ -58,6 +58,7 @@ const abortWithError = (err) => {
 			...env,
 			MQTT_URI,
 			READ_VEHICLE_POSITIONS_FROM_STDIN: 'true',
+			SEND_PLANNED_VEHICLE_POSITIONS: 'false',
 		},
 	})
 	svc.catch((err) => {
@@ -74,6 +75,7 @@ const abortWithError = (err) => {
 	await new Promise(resolve => setTimeout(resolve, 5 * 1000))
 
 	// { // test GTFS-RT feed served via HTTP
+	// 	// todo: DRY with test/herrenberg-planned-positions
 	// 	// todo: http.request runs endlessly, but curl works. why?
 	// 	// const res = await pRequest('http://localhost:3000/', {
 	// 	// 	headers: {
@@ -107,7 +109,6 @@ const abortWithError = (err) => {
 
 	// 	const vPPredicted = entities.find(e => e.vehicle?.vehicle?.id === VEHICLE_ID)
 	// 	ok(vPPredicted, 'missing predicted VehiclePosition')
-	// 	console.error('vPPredicted', vPPredicted)
 	// 	// todo
 	// 	// eql(+vPPredicted.vehicle.position?.latitude.toFixed(3), 48.602, 'predicted VehiclePosition: invalid position.latitude')
 	// 	// eql(+vPPredicted.vehicle.position?.longitude.toFixed(2), 8.89, 'predicted VehiclePosition: invalid position.longitude')
