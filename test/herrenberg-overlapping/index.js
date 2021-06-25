@@ -49,12 +49,14 @@ const connectToMQTT = (uri) => {
 		db.end()
 	}
 
+	const MOCK_T0 = 1623670817000
 	const env = {
 		// todo: thingsboard
 		TIMEZONE: 'Europe/Berlin',
 		LOCALE: 'de-DE',
 		GTFS_ID: 'test',
 		TRAJECTORIES_DIR: pathJoin(__dirname, 'trajectories'),
+		MOCK_T0: MOCK_T0 + '',
 	}
 
 	{ // import GTFS into PostgreSQL DB
@@ -167,8 +169,7 @@ const connectToMQTT = (uri) => {
 
 		eql(header.gtfsRealtimeVersion, '2.0', 'header.gtfsRealtimeVersion')
 		eql(header.incrementality, Incrementality.FULL_DATASET, 'header.incrementality')
-		// todo: generate timestamp from latest FeedEntity
-		ok(+header.timestamp > 1623939743, 'header.timestamp')
+		ok(header.timestamp * 1000 >= MOCK_T0, 'header.timestamp')
 
 		// 1 raw VehiclePosition, 1 predicted VehiclePosition, 1 TripUpdate
 		const expectedNrOfEntities = 3
@@ -200,6 +201,8 @@ const connectToMQTT = (uri) => {
 		console.info('GTFS-RT served via HTTP looks good ✔︎')
 	}
 
+	await new Promise(resolve => setTimeout(resolve, 5 * 1000))
+
 	{ // test GTFS-RT messages sent via MQTT
 		const latestMsg = (topic) => Array.from(receivedViaMQTT).reverse().find(([t]) => t === topic)
 
@@ -209,14 +212,14 @@ const connectToMQTT = (uri) => {
 		ok(vPRawJSON, 'missing raw JSON-encoded VehiclePosition')
 
 		const vPPredictedPBF = latestMsg('/gtfsrt/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
-		ok(vPPredictedPBF, 'missing raw pbf-encoded VehiclePosition')
+		ok(vPPredictedPBF, 'missing predicted pbf-encoded VehiclePosition')
 		const vPPredictedJSON = latestMsg('/json/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
-		ok(vPPredictedJSON, 'missing raw JSON-encoded VehiclePosition')
+		ok(vPPredictedJSON, 'missing predicted JSON-encoded VehiclePosition')
 
 		const tUPBF = latestMsg('/gtfsrt/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
-		ok(tUPBF, 'missing raw pbf-encoded TripUpdate')
+		ok(tUPBF, 'missing pbf-encoded TripUpdate')
 		const tUJSON = latestMsg('/json/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
-		ok(tUJSON, 'missing raw JSON-encoded TripUpdate')
+		ok(tUJSON, 'missing JSON-encoded TripUpdate')
 
 		// todo: check message fields
 		console.info('GTFS-RT sent via MQTT looks good ✔︎')
