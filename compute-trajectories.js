@@ -7,6 +7,7 @@ const readServices = require('gtfs-utils/read-services-and-exceptions')
 const computeTrajectories = require('gtfs-utils/compute-trajectories')
 const resolveTime = require('gtfs-utils/lib/resolve-time')
 const {writeFile} = require('fs/promises')
+const routesToBeMatched = require('./lib/routes-to-be-matched')
 const pkg = require('./package.json')
 
 const TIMEZONE = process.env.TIMEZONE
@@ -27,16 +28,7 @@ if (!destDir) {
 }
 
 const filters = {
-	trip: t => [
-		// Herrenberg 773 bus
-		'31-773-j21-4', '31-773-j21-5',
-		// Herrenberg 779 bus
-		'31-779-j21-2',
-		// Herrenberg 780 bus
-		'31-780-j21-1', '31-780-j21-2',
-		// Herrenberg 782 bus
-		'31-782-j21-1',
-	].includes(t.route_id),
+	trip: t => routesToBeMatched.includes(t.route_id),
 }
 
 const withAbsoluteTime = (tr, date) => {
