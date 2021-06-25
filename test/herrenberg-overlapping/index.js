@@ -216,6 +216,13 @@ const connectToMQTT = (uri) => {
 		const vPPredictedJSON = latestMsg('/json/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
 		ok(vPPredictedJSON, 'missing predicted JSON-encoded VehiclePosition')
 
+		const vPPredicted = FeedMessage.decode(vPPredictedPBF[1])
+		eql(vPPredicted.header.incrementality, Incrementality.DIFFERENTIAL, 'predicted vehicle pos: FeedHeader.incrementality')
+		// expected: time of latest vehicle pos
+		eql(+vPPredicted.header.timestamp, 1623670816, 'vpredicted vehicle pos: FeedHeader.timestamp')
+		// expected: time of prediction
+		ok(+vPPredicted.entity[0].vehicle.timestamp > 1623670816, 'vpredicted vehicle pos: VehiclePosition.timestamp')
+
 		const tUPBF = latestMsg('/gtfsrt/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
 		ok(tUPBF, 'missing pbf-encoded TripUpdate')
 		const tUJSON = latestMsg('/json/tu/14341fa0-5b00-11eb-98a5-133ebfea8661')
