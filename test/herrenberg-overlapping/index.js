@@ -117,6 +117,7 @@ const connectToMQTT = (uri) => {
 			...env,
 			MQTT_URI,
 			READ_VEHICLE_POSITIONS_FROM_STDIN: 'true',
+			SEND_PLANNED_VEHICLE_POSITIONS: 'false',
 		},
 	})
 	svc.catch((err) => {

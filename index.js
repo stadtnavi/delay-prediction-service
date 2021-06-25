@@ -12,6 +12,9 @@ const {
 	schedulePrognoseTripUpdate,
 	schedulePrognoseVehiclePosition,
 } = require('./lib/schedule-timer')
+const sendPlannedVehiclePositions = require('./lib/planned-vehicle-positions')
+
+const SEND_PLANNED_VEHICLE_POSITIONS = process.env.SEND_PLANNED_VEHICLE_POSITIONS !== 'false'
 
 const processVehiclePosition = async (db, vehiclePosEv) => {
 	if (vehiclePosEv.hdop < 0) {
@@ -33,6 +36,22 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 	])
 	schedulePrognoseTripUpdate(10 * 1000, vehicleId, tVehiclePos)
 	schedulePrognoseVehiclePosition(5 * 1000, vehicleId, tVehiclePos)
+}
+
+if (SEND_PLANNED_VEHICLE_POSITIONS) {
+	// In some cases, we can't publish predicted vehicle positions (or trip updates,
+	// for that matter), but we send vehicle positions according to the schedule.
+	// todo: indicate that they are not reliable, e.g. using a MQTT topic flag or proprietary msg field
+	const periodicallySendPlannedVehiclePositions = () => {
+		runWithinTx(db => sendPlannedVehiclePositions(db))
+		.catch((err) => {
+			logger.error(err, 'failed to send planned vehicle positions')
+		})
+		.then(() => {
+			setTimeout(periodicallySendPlannedVehiclePositions, 10 * 1000)
+		})
+	}
+	setTimeout(periodicallySendPlannedVehiclePositions, 10 * 1000)
 }
 
 pipeline(
