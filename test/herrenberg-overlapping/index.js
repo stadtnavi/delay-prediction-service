@@ -13,7 +13,7 @@ const {Client: PostgresClient} = require('pg')
 const {transit_realtime: {
 	FeedMessage,
 	FeedHeader: {Incrementality},
-	VehiclePosition: {VehicleStopStatus},
+	VehiclePosition: {VehicleStopStatus, OccupancyStatus},
 }} = require('gtfs-realtime-bindings')
 const {deepStrictEqual: eql, ok} = require('assert')
 
@@ -183,6 +183,7 @@ const connectToMQTT = (uri) => {
 		eql(vPPredicted.vehicle.currentStopSequence, 10, 'predicted VehiclePosition: invalid currentStopSequence')
 		eql(vPPredicted.vehicle.stopId, 'de:08115:4800:0:3', 'predicted VehiclePosition: invalid stopId')
 		eql(vPPredicted.vehicle.currentStatus, VehicleStopStatus.IN_TRANSIT_TO, 'predicted VehiclePosition: invalid currentStatus')
+		eql(vPPredicted.vehicle.occupancyStatus, OccupancyStatus.MANY_SEATS_AVAILABLE, 'predicted VehiclePosition: invalid occupancyStatus')
 		// todo: assert more
 
 		const tU = entities.find(e => !!e.tripUpdate)

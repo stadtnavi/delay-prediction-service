@@ -5,6 +5,7 @@ CREATE TABLE vehicle_positions (
 	vehicle_id TEXT NOT NULL,
 	location geography(POINT) NOT NULL,
 	hdop DOUBLE PRECISION NOT NULL,
+	pax DOUBLE PRECISION NOT NULL,
 	t TIMESTAMPTZ NOT NULL,
 	CONSTRAINT vehicle_positions_unique UNIQUE (vehicle_id, t)
 );

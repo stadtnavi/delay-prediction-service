@@ -10,7 +10,7 @@ In addition, this project introduces the following terms:
 
 - **run** – An "instance" of a GTFS *trip* on a single service day, e.g. trip `a-outbound-all-day-11` on service day `2021-06-15`.
 - **vehicle position** – [WGS 84](https://epsg.io/4326) latitude & longitude; Usually includes a horizontal [dilution of precision](https://en.wikipedia.org/wiki/Dilution_of_precision_(navigation)) *hdop*.
-- **vehicle position event** – A single vehicle position, including the date+time it has been observed at.
+- **vehicle position event** – A single vehicle position, including the date+time it has been observed at, and a [pax](https://english.stackexchange.com/a/25130) value.
 - **trajectory** – The spatio-temporal "progression" (a set of location & time pairs) of a *run*, defined by the GTFS-Static dataset.
 - **match** – A *run*/*trajectory* determined to be the best "fitting" for a set of vehicle positions (see below).
 
@@ -599,7 +599,7 @@ Using this data, we generate a [GTFS-RT `TripUpdate`](https://gtfs.org/reference
 
 Because the *trajectory* represents the planned equivalent to the vehicle's realtime movement, we can compute where the vehicle should be right now.
 
-From this estimated position, we generate a [GTFS-RT `VehiclePosition`](https://gtfs.org/reference/realtime/v2/#message-vehicleposition).
+From this estimated position, we generate a [GTFS-RT `VehiclePosition`](https://gtfs.org/reference/realtime/v2/#message-vehicleposition). Using the `pax` value (estimated nr of passengers in the vehicle), we calculate the [`OccupancyStatus`](https://developers.google.com/transit/gtfs-realtime/reference/#enum-occupancystatus).
 
 ## 5. publish predictions as GTFS-RT
 
