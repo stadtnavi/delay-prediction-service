@@ -13,7 +13,10 @@ CREATE INDEX ON vehicle_positions (vehicle_id, t);
 -- CREATE INDEX ON vehicle_positions USING GIST (location);
 
 CREATE TYPE currently_active_run AS (
+	route_id TEXT,
+	route_short_name TEXT,
 	trip_id TEXT,
+	trip_headsign TEXT,
 	date TIMESTAMP,
 	shape_id TEXT
 );
@@ -28,12 +31,15 @@ RETURNS SETOF currently_active_run
 AS $$
 	SELECT
 		DISTINCT ON (trip_id, date)
-		*
+		route_id,
+		route_short_name,
+		trip_id,
+		trip_headsign,
+		date,
+		shape_id
 	FROM (
 		SELECT
-			trip_id,
-			date,
-			shape_id
+			*
 		FROM arrivals_departures
 		WHERE True
 		-- cut off by date for better performance
