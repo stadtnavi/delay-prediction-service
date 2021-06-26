@@ -18,7 +18,8 @@ CREATE TYPE currently_active_run AS (
 	trip_id TEXT,
 	trip_headsign TEXT,
 	date TIMESTAMP,
-	shape_id TEXT
+	shape_id TEXT,
+	t_departure_0 timestamptz
 );
 
 CREATE FUNCTION current_runs(
@@ -36,10 +37,16 @@ AS $$
 		trip_id,
 		trip_headsign,
 		date,
-		shape_id
+		shape_id,
+		t_departure_0
 	FROM (
 		SELECT
-			*
+			*,
+			first_value(t_departure) OVER (
+				PARTITION BY trip_id, date
+				ORDER BY stop_sequence ASC
+				RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+			) AS t_departure_0
 		FROM arrivals_departures
 		WHERE True
 		-- cut off by date for better performance
