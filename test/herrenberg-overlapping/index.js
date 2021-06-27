@@ -1,118 +1,48 @@
 #!/usr/bin/env node
 'use strict'
 
-const {connect} = require('mqtt')
 // const {request} = require('http')
 const {join: pathJoin} = require('path')
 const {readdir, readFile} = require('fs/promises')
 const execa = require('execa')
-const aedes = require('aedes')
-const {createServer: createTCPServer} = require('net')
 const {promisify} = require('util')
-const {Client: PostgresClient} = require('pg')
 const {transit_realtime: {
 	FeedMessage,
 	FeedHeader: {Incrementality},
 	VehiclePosition: {VehicleStopStatus, OccupancyStatus},
 }} = require('gtfs-realtime-bindings')
 const {deepStrictEqual: eql, ok} = require('assert')
+const importTestData = require('../lib/import-test-data')
+const startMQTTServerAndClient = require('../lib/mqtt-broker-client')
 
 const abortWithError = (err) => {
 	console.error(err)
 	process.exit(1)
 }
 
-const connectToMQTT = (uri) => {
-	return new Promise((resolve, reject) => {
-		const client = connect(uri)
-		const timer = setTimeout(() => {
-			reject(new Error('timeout connecting to MQTT broker'))
-			client.end()
-		}, 1000)
-		client.once('connect', () => {
-			clearTimeout(timer)
-			resolve(client)
-		})
-	})
-}
-
 ;(async () => {
-	{ // create "test" PostgreSQL DB
-		const db = new PostgresClient({
-			database: 'postgres'
-		})
-		await db.connect()
-		const {rows} = await db.query(`SELECT FROM pg_database WHERE datname = 'test'`)
-		if (rows.length === 0) { // DB "test" does not exist
-			await db.query('CREATE DATABASE test')
-		}
-		db.end()
-	}
+	const trajectoriesDir = pathJoin(__dirname, 'trajectories')
+	await importTestData({
+		dbName: 'test_herrenberg_overlapping',
+		gtfsDir: __dirname,
+		trajectoriesDir,
+	})
 
 	const MOCK_T0 = 1623670817000
 	const env = {
 		// todo: thingsboard
 		TIMEZONE: 'Europe/Berlin',
 		LOCALE: 'de-DE',
-		GTFS_ID: 'test',
-		TRAJECTORIES_DIR: pathJoin(__dirname, 'trajectories'),
+		GTFS_ID: 'test_herrenberg_overlapping',
+		TRAJECTORIES_DIR: trajectoriesDir,
 		MOCK_T0: MOCK_T0 + '',
 	}
 
-	{ // import GTFS into PostgreSQL DB
-		const gtfsToSql = require.resolve('gtfs-via-postgres/cli.js')
-		const files = (await readdir(__dirname)).filter(f => f.slice(-4) === '.txt')
-		await execa.command([
-			gtfsToSql,
-			'-d --routes-without-agency-id --trips-without-shape-id',
-			'--', ...files,
-			'| sponge',
-			'| psql -b'
-		].join(' '), {
-			shell: true,
-			cwd: __dirname,
-			env: {
-				...env,
-				PGDATABASE: 'test',
-			},
-			stdio: 'inherit',
-		})
-	}
-
-	{ // deploy SQL schema to PostgreSQL DB
-		await execa.command('psql -b -f deploy.sql', {
-			shell: true,
-			cwd: pathJoin(__dirname, '..', '..'),
-			env: {
-				...env,
-				PGDATABASE: 'test',
-			},
-			stdio: 'inherit',
-		})
-	}
-
-	{ // generate trajectories
-		// todo: remove old trajectories first
-		const computeTrajectories = pathJoin(__dirname, '..', '..', 'compute-trajectories.js')
-		await execa(computeTrajectories, {
-			cwd: __dirname,
-			env: {
-				...env,
-				GTFS_DIR: __dirname,
-			},
-			stdio: 'inherit',
-		})
-	}
-
-	// start MQTT Broker
-	const mqttServer = createTCPServer(aedes().handle)
-	const stopMQTTBroker = async () => {
-		await promisify(mqttServer.close.bind(mqttServer))()
-	}
-	await promisify(mqttServer.listen.bind(mqttServer))(30883)
-	const MQTT_URI = 'mqtt://localhost:30883'
-
-	const mqttClient = await connectToMQTT(MQTT_URI)
+	// start MQTT broker & client
+	const {
+		MQTT_URI, client: mqttClient,
+		stop: stopMQTTClientAndServer,
+	} = await startMQTTServerAndClient()
 	await promisify(mqttClient.subscribe.bind(mqttClient))('/gtfsrt/#')
 	await promisify(mqttClient.subscribe.bind(mqttClient))('/json/#')
 	const receivedViaMQTT = []
@@ -239,7 +169,6 @@ const connectToMQTT = (uri) => {
 
 	// stop service
 	svc.cancel()
-	mqttClient.end()
-	await stopMQTTBroker()
+	await stopMQTTClientAndServer()
 })()
 .catch(abortWithError)

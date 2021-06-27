@@ -8,3 +8,4 @@ npm-debug.log
 .env
 /data
 /test/herrenberg-overlapping/trajectories
+/test/herrenberg-planned-positions/trajectories

@@ -54,6 +54,7 @@
 		"eslint": "^7.25.0",
 		"execa": "^5.1.1",
 		"gtfs-via-postgres": "^2.9.1",
+		"pg-format": "^1.0.4",
 		"pino-pretty": "^4.8.0",
 		"rimraf": "^3.0.2",
 		"sample-gtfs-feed": "^0.10.3"
