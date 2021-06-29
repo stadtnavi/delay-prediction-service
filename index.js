@@ -14,6 +14,13 @@ const {
 } = require('./lib/schedule-timer')
 const sendPlannedVehiclePositions = require('./lib/planned-vehicle-positions')
 
+const PREDICTED_TRIP_UPDATES_INTERVAL = process.env.PREDICTED_TRIP_UPDATES_INTERVAL
+	? parseInt(process.env.PREDICTED_TRIP_UPDATES_INTERVAL) * 1000
+	: 10 * 1000
+const PREDICTED_VEHICLE_POSITIONS_INTERVAL = process.env.PREDICTED_VEHICLE_POSITIONS_INTERVAL
+	? parseInt(process.env.PREDICTED_VEHICLE_POSITIONS_INTERVAL) * 1000
+	: 5 * 1000
+
 const SEND_PLANNED_VEHICLE_POSITIONS = process.env.SEND_PLANNED_VEHICLE_POSITIONS !== 'false'
 const PLANNED_VEHICLE_POSITIONS_INTERVAL = process.env.PLANNED_VEHICLE_POSITIONS_INTERVAL
 	? parseInt(process.env.PLANNED_VEHICLE_POSITIONS_INTERVAL) * 1000
@@ -37,8 +44,8 @@ const processVehiclePosition = async (db, vehiclePosEv) => {
 		prognoseTripUpdate(db, vehicleId, tVehiclePos),
 		prognoseVehiclePosition(db, vehicleId, tVehiclePos),
 	])
-	schedulePrognoseTripUpdate(10 * 1000, vehicleId, tVehiclePos)
-	schedulePrognoseVehiclePosition(5 * 1000, vehicleId, tVehiclePos)
+	schedulePrognoseTripUpdate(PREDICTED_TRIP_UPDATES_INTERVAL, vehicleId, tVehiclePos)
+	schedulePrognoseVehiclePosition(PREDICTED_VEHICLE_POSITIONS_INTERVAL, vehicleId, tVehiclePos)
 }
 
 if (SEND_PLANNED_VEHICLE_POSITIONS) {
