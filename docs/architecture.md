@@ -5,9 +5,9 @@
 This service needs access to the following infrastructure
 
 - a **PostgreSQL database**, contains
-	- the schedules data, generated from GTFS-Static data by [`build.sh`](../build.sh)
+	- the schedules data, generated from GTFS-Static data by [`scripts/build.sh`](../scripts/build.sh)
 - a **data directory**, contains
-	- *trajectories*, generated from GTFS-Static data by [`build.sh`](../build.sh)
+	- *trajectories*, generated from GTFS-Static data by [`scripts/build.sh`](../scripts/build.sh)
 	- information about the GTFS feed being used
 - **City of Herrenberg's [Thingsboard](https://thingsboard.io/)** instance
 	- provides the realtime vehicle positions

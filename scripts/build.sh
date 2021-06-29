@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 set -o pipefail
-cd $(dirname $(realpath $0))
+cd $(dirname $(dirname $(realpath $0))) # change to project root
 
 # This scripts is written for continuous deployment environments.
 # Because it is idempotent and cleans up after itself (except in
@@ -35,12 +35,6 @@ set -x
 env | grep '^PG' || true
 
 PATH="$(realpath node_modules/.bin):$PATH"
-
-prev_GTFS_ID=''
-if [ -s 'data/gtfs_id' ]; then
-	prev_GTFS_ID="$(cat data/gtfs_id | tr -d '\n')"
-	echo "previous \$GTFS_ID: $prev_GTFS_ID"
-fi
 
 # download GTFS feed to tmp file
 user_agent='https://github.com/stadtnavi/delay-prediction-service'
@@ -114,13 +108,3 @@ fi
 
 # store current $GTFS_ID
 echo -n "$GTFS_ID" >data/gtfs_id
-
-if [[ ! -z "$prev_GTFS_ID" && "$GTFS_ID" != "$prev_GTFS_ID" ]]; then
-	# delete old database if present
-	psql -c "DROP DATABASE IF EXISTS $prev_GTFS_ID"
-
-	# delete old trajectories if present
-	if [ -d "data/trajectories-$prev_GTFS_ID" ]; then
-		rm -r "data/trajectories-$prev_GTFS_ID"
-	fi
-fi

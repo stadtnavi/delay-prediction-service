@@ -21,7 +21,7 @@ A Docker image [is available as `stadtnavi/delay-prediction-service`](https://hu
 
 ### building
 
-[`build.sh`](build.sh) is designed to allow continuous deployments. Given the name and URL of a GTFS feed, it will generate all necessary data for `delay-prediction-service` to work.
+[`scripts/build.sh`](scripts/build.sh) is designed to allow continuous deployments. Given the name and URL of a GTFS feed, it will generate all necessary data for `delay-prediction-service` to work.
 
 The following is an example with the [VVS feed](https://www.openvvs.de/dataset/gtfs-daten), cleaned up and served by [`gtfs.mfdz.de`](https://gtfs.mfdz.de).
 
@@ -32,7 +32,7 @@ docker run --rm -it \
     -e PGHOST -e PGUSER -e PGPASSWORD \
     -e GTFS_NAME=vss -e GTFS_URL='https://gtfs.mfdz.de/VVS.filtered.gtfs.zip'
     stadtnavi/delay-prediction-service \
-    ./build.sh
+    ./scripts/build.sh
 ```
 
 ### running
@@ -84,7 +84,7 @@ npm install
 
 ```shell
 # build step
-env GTFS_NAME=vss -e GTFS_URL='https://gtfs.mfdz.de/VVS.filtered.gtfs.zip' ./build.sh
+env GTFS_NAME=vss -e GTFS_URL='https://gtfs.mfdz.de/VVS.filtered.gtfs.zip' ./scripts/build.sh
 
 # run step
 node index.js
