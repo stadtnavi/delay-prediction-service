@@ -28,7 +28,7 @@ const abortWithError = (err) => {
 		trajectoriesDir,
 	})
 
-	const MOCK_T0 = 1623670817000
+	const MOCK_T0 = 1623670817000 // 2021-06-14T13:40:17+02
 	const env = {
 		// todo: thingsboard
 		TIMEZONE: 'Europe/Berlin',
@@ -70,7 +70,7 @@ const abortWithError = (err) => {
 		const vehiclePositions = await readFile(file, {encoding: 'utf8'})
 		svc.stdin.end(vehiclePositions)
 	}
-	const VEHICLE_ID = '14341fa0-5b00-11eb-98a5-133ebfea8661'
+	const VEHICLE_ID = '45.T0.31-782-j21-1.5.H-2021-06-14'
 
 	await new Promise(resolve => setTimeout(resolve, 5 * 1000))
 
@@ -143,9 +143,9 @@ const abortWithError = (err) => {
 		const vPRawJSON = latestMsg('/json/vp-raw/14341fa0-5b00-11eb-98a5-133ebfea8661')
 		ok(vPRawJSON, 'missing raw JSON-encoded VehiclePosition')
 
-		const vPPredictedPBF = latestMsg('/gtfsrt/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
+		const vPPredictedPBF = latestMsg(`/gtfsrt/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/${VEHICLE_ID}/48;8./.8/68/09/782`)
 		ok(vPPredictedPBF, 'missing predicted pbf-encoded VehiclePosition')
-		const vPPredictedJSON = latestMsg('/json/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/14341fa0-5b00-11eb-98a5-133ebfea8661/48;8./.8/68/09/782')
+		const vPPredictedJSON = latestMsg(`/json/vp/hbg/1/1/bus/31-782-j21-1/0/Herrenberg Waldfriedhof/45.T0.31-782-j21-1.5.H/de:08115:4800:0:3/13:21:00/${VEHICLE_ID}/48;8./.8/68/09/782`)
 		ok(vPPredictedJSON, 'missing predicted JSON-encoded VehiclePosition')
 
 		const vPPredicted = FeedMessage.decode(vPPredictedPBF[1])
@@ -154,6 +154,7 @@ const abortWithError = (err) => {
 		eql(+vPPredicted.header.timestamp, 1623670816, 'vpredicted vehicle pos: FeedHeader.timestamp')
 		// expected: time of prediction
 		ok(+vPPredicted.entity[0].vehicle.timestamp > 1623670816, 'vpredicted vehicle pos: VehiclePosition.timestamp')
+		eql(vPPredicted.entity[0].vehicle.vehicle.id, VEHICLE_ID, 'vpredicted vehicle pos: VehiclePosition.vehicle.id')
 		eql(vPPredicted.entity[0].vehicle.currentStopSequence, 10, 'vpredicted vehicle pos: VehiclePosition.currentStopSequence')
 		eql(vPPredicted.entity[0].vehicle.stopId, 'de:08115:4800:0:3', 'vpredicted vehicle pos: VehiclePosition.stopId')
 		eql(vPPredicted.entity[0].vehicle.currentStatus, VehicleStopStatus.IN_TRANSIT_TO, 'vpredicted vehicle pos: VehiclePosition.currentStatus')
